@@ -3,6 +3,10 @@ plugins {
     id 'jacoco'
 }
 
+jacoco {
+    toolVersion = "0.8.10"
+}
+
 repositories {
     mavenCentral()
 }
@@ -13,8 +17,29 @@ dependencies {
     testImplementation "org.assertj:assertj-core:3.24.2"
 }
 
+jacocoTestReport {
+    dependsOn test
+    
+    reports {
+        xml.required = true
+        html.required = false
+    }
+    
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/test/**',
+                '**/*Test*',
+                '**/*Tests*',
+                '**/*Spec*'
+            ])
+        }))
+    }
+}
+
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 tasks.withType(JavaCompile) {
